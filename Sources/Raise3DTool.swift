@@ -70,7 +70,7 @@ Options : ParsableArguments
 	var addr						:	String
 
 	@Option(name: [.short, .customLong("password")], help: "The printer’s password.")
-	var password					:	String = ""
+	var password					:	String?
 
 }
 
@@ -93,7 +93,14 @@ Raise3DTool
 			async
 			throws
 		{
-			let api = Raise3DAPI(host: self.options.addr, password: self.options.password)
+			let password = self.options.password ??
+			{
+				print("Password: ", terminator: "")
+				let pw = readLine(strippingNewline: true)
+				return pw!
+			}()
+			
+			let api = Raise3DAPI(host: self.options.addr, password: password)
 			try await api.login()
 			let jobResp = try await api.getJobInformation()
 			
@@ -138,7 +145,14 @@ Status : PrinterCommand
 		async
 		throws
 	{
-		let api = Raise3DAPI(host: self.options.addr, password: self.options.password)
+		let password = self.options.password ??
+		{
+			print("Password: ", terminator: "")
+			let pw = readLine(strippingNewline: true)
+			return pw!
+		}()
+		
+		let api = Raise3DAPI(host: self.options.addr, password: password)
 		try await api.login()
 		let statusResp = try await api.getRunningStatus()
 		let basicResp = try await api.getBasicInformation()
@@ -175,7 +189,14 @@ Info : AsyncParsableCommand
 		async
 		throws
 	{
-		let api = Raise3DAPI(host: self.options.addr, password: self.options.password)
+		let password = self.options.password ??
+		{
+			print("Password: ", terminator: "")
+			let pw = readLine(strippingNewline: true)
+			return pw!
+		}()
+		
+		let api = Raise3DAPI(host: self.options.addr, password: password)
 		try await api.login()
 		let resp = try await api.getSystemInformation()
 		guard
@@ -217,9 +238,16 @@ Monitor : AsyncParsableCommand
 		async
 		throws
 	{
-		print("Monitoring printer at address: \(self.options.addr), password \(self.options.password)")
+		print("Monitoring printer at address: \(self.options.addr)")
 		
-		let api = Raise3DAPI(host: self.options.addr, password: self.options.password)
+		let password = self.options.password ??
+		{
+			print("Password: ", terminator: "")
+			let pw = readLine(strippingNewline: true)
+			return pw!
+		}()
+		
+		let api = Raise3DAPI(host: self.options.addr, password: password)
 		try await api.login()
 		
 		//	Get the current state…
@@ -246,10 +274,13 @@ Monitor : AsyncParsableCommand
 				
 				let progress = jobStatus.progress / 100.0
 				let progS = progress.formatted(.percent.precision(.fractionLength(1)))
-				print("Progress: \(progS) (next milestone: \(self.nextProgressMilestone.formatted(.percent.precision(.fractionLength(1)))))")
 				
-				if progress >= self.nextProgressMilestone
+				if progress > 0.0
+					&& progress >= self.nextProgressMilestone
+					&& jobStatus.status == .running
 				{
+					print("Progress: \(progS) (next milestone: \(self.nextProgressMilestone.formatted(.percent.precision(.fractionLength(1)))))")
+					
 					if let notifyKey = self.notify
 					{
 						let remaining = Duration.seconds(jobStatus.totalTime - jobStatus.elapsedTime)
@@ -261,7 +292,7 @@ Monitor : AsyncParsableCommand
 				self.nextProgressMilestone = nextMilestone(for: progress)
 				
 				if lastStatus != jobStatus.status,
-					[.paused, .stopped].contains(jobStatus.status)
+					[.paused, .stopped, .completed].contains(jobStatus.status)
 				{
 					print("Printer has paused or stopped")
 					
@@ -287,6 +318,11 @@ Monitor : AsyncParsableCommand
 	nextMilestone(for inProg: Float)
 		-> Float
 	{
+		if inProg == 0.0
+		{
+			return 0.1
+		}
+		
 		let next = ceil(inProg * 10.0) / 10.0
 		return next
 	}
