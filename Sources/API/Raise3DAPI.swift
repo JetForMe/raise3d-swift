@@ -8,6 +8,22 @@
 import CryptoKit
 import Foundation
 
+/**
+	A simple wrapper for the Raise3D local printer HTTP REST API. Note that access
+	to the API must be enabled on the printer. See [this article]() for details.
+	
+	Basic usage:
+	
+	```swift
+	import Raise3DAPI
+	
+	let api = Raise3DAPI(host: "192.168.0.123:10800", password: "da4536")
+	try await api.login()
+	
+	let systemInfo = try await api.getSystemInformation()
+	print("Version: \(systemInfo.version)")
+	```
+*/
 
 public
 class
@@ -28,6 +44,10 @@ Raise3DAPI
 		self.baseURL = URL(string: "http://\(inHost)/v1/")!
 		self.password = inPassword
 	}
+	
+	/**
+		Authenticate with the printer using the password set in the printer settings.
+	*/
 	
 	public
 	func
@@ -72,7 +92,6 @@ Raise3DAPI
 		return md5hex
 	}
 	
-	public
 	struct
 	PrinterResponse<ResponseData : Codable> : Codable
 	{
@@ -81,7 +100,6 @@ Raise3DAPI
 		var error				:	ResponseError?
 	}
 	
-	public
 	struct
 	ResponseError : Codable
 	{
@@ -89,13 +107,16 @@ Raise3DAPI
 		var msg					:	String
 	}
 	
-	public
 	struct
 	LoginData : Codable
 	{
 		var token				:	String
 	}
-		
+	
+	/**
+		Returns basic printer information, including name, model, and software versions.
+	*/
+	
 	public
 	func
 	getSystemInformation()
@@ -157,7 +178,11 @@ Raise3DAPI
 			case version				=	"version"
 		}
 	}
-		
+	
+	/**
+		Returns the current running status of the printer. See also ``getJobInformation()``.
+	*/
+	
 	public
 	func
 	getRunningStatus()
@@ -195,6 +220,8 @@ Raise3DAPI
 	struct
 	RunningStatus : Codable
 	{
+		public var	status				:	Status
+		
 		public
 		enum
 		Status : String, Codable
@@ -207,15 +234,17 @@ Raise3DAPI
 			case error
 		}
 		
-		public var	status				:	Status
-		
 		enum
 		CodingKeys : String, CodingKey
 		{
 			case status					=	"running_status"
 		}
 	}
-		
+	
+	/**
+		Returns information about the state of fans, feed, and heatbed.
+	*/
+	
 	public
 	func
 	getBasicInformation()
@@ -271,7 +300,12 @@ Raise3DAPI
 			case targetHeatbedTemp		=	"heatbed_tar_temp"
 		}
 	}
-		
+	
+	/**
+		Returns information about the current job, if any, including status, progress, and elapsed time.
+		See also ``getRunningStatus()``.
+	*/
+	
 	public
 	func
 	getJobInformation()
@@ -310,8 +344,8 @@ Raise3DAPI
 	JobInformation : Codable
 	{
 		public var	fileName			:	String
-		public var	progress			:	Float		//	TODO: divide returned value by 100.
-		public var	status				:	Status
+		public var	progress			:	Float
+		public var	status				:	Status			///	A value in the range [0.0...1.0] representing the print progress.
 		public var	elapsedTime			:	Int
 		public var	totalTime			:	Int
 		
@@ -333,6 +367,33 @@ Raise3DAPI
 			case fileName			=	"file_name"
 			case progress			=	"print_progress"
 			case status				=	"job_status"
+		}
+		
+		public
+		init(from inDecoder: any Decoder)
+			throws
+		{
+			let container = try inDecoder.container(keyedBy: CodingKeys.self)
+			
+			self.elapsedTime = try container.decode(Int.self, forKey: .elapsedTime)
+			self.totalTime = try container.decode(Int.self, forKey: .totalTime)
+			self.fileName = try container.decode(String.self, forKey: .fileName)
+			self.progress = try container.decode(Float.self, forKey: .progress) / 100.0
+			self.status = try container.decode(Raise3DAPI.JobInformation.Status.self, forKey: .status)
+		}
+		
+		public
+		func
+		encode(to inEncoder: any Encoder)
+			throws
+		{
+			var container = inEncoder.container(keyedBy: CodingKeys.self)
+			
+			try container.encode(self.elapsedTime, forKey: .elapsedTime)
+			try container.encode(self.totalTime, forKey: .totalTime)
+			try container.encode(self.fileName, forKey: .fileName)
+			try container.encode(self.progress * 100.0, forKey: .progress)
+			try container.encode(self.status, forKey: .status)
 		}
 	}
 	

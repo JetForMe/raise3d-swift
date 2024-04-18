@@ -7,7 +7,7 @@ import Raise3DAPI
 
 @main
 struct
-Raise3DTool : AsyncParsableCommand
+Raise3DCLI : AsyncParsableCommand
 {
 	static
 	var
@@ -76,7 +76,7 @@ Options : ParsableArguments
 }
 
 extension
-Raise3DTool
+Raise3DCLI
 {
 	struct
 	JobStatus : AsyncParsableCommand
@@ -107,7 +107,7 @@ Raise3DTool
 			
 			print("File:           \(job.fileName)")
 			print("Status:         \(job.status)")
-			print("Progress:       \((job.progress / 100.0).formatted(.percent.precision(.fractionLength(1))))")
+			print("Progress:       \((job.progress).formatted(.percent.precision(.fractionLength(1))))")
 			
 			let remaining = Duration.seconds(job.totalTime - job.elapsedTime)
 			print("Time remaining: \(remaining.formatted(.time(pattern: .hourMinuteSecond(padHourToLength: 2))))")
@@ -186,6 +186,7 @@ Info : AsyncParsableCommand
 		
 		print("Name:              \(info.name)")
 		print("Model:             \(info.model)")
+		print("Version:           \(info.version)")
 		let storage = Measurement(value: Double(info.storageAvailable), unit: UnitInformationStorage.bytes)
 		print("Storage available: \(storage.formatted(.byteCount(style: .memory)))")
 		print("Firmware version:  \(info.firmwareVersion)")
@@ -230,7 +231,11 @@ Monitor : AsyncParsableCommand
 		//	Get the current state…
 		
 		let initJob = try await api.getJobInformation()
-		self.nextProgressMilestone = nextMilestone(for: initJob.progress / 100.0)
+		self.nextProgressMilestone = nextMilestone(for: initJob.progress)
+		
+		var progress = initJob.progress
+		var progS = progress.formatted(.percent.precision(.fractionLength(1)))
+		print("Progress: \(progS) (next milestone: \(self.nextProgressMilestone.formatted(.percent.precision(.fractionLength(1)))))")
 		
 		//	Poll the printer for updates…
 		
@@ -240,8 +245,8 @@ Monitor : AsyncParsableCommand
 			{
 				let job = try await api.getJobInformation()
 				
-				let progress = job.progress / 100.0
-				let progS = progress.formatted(.percent.precision(.fractionLength(1)))
+				progress = job.progress
+				progS = progress.formatted(.percent.precision(.fractionLength(1)))
 				
 				if progress > 0.0
 					&& progress >= self.nextProgressMilestone
