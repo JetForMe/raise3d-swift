@@ -9,10 +9,11 @@ import CryptoKit
 import Foundation
 
 
-
+public
 class
 Raise3DAPI
 {
+	public
 	enum
 	Errors : Error
 	{
@@ -21,12 +22,14 @@ Raise3DAPI
 		case requestFailed
 	}
 	
+	public
 	init(host inHost: String, password inPassword: String)
 	{
 		self.baseURL = URL(string: "http://\(inHost)/v1/")!
 		self.password = inPassword
 	}
 	
+	public
 	func
 	login()
 		async
@@ -69,6 +72,7 @@ Raise3DAPI
 		return md5hex
 	}
 	
+	public
 	struct
 	PrinterResponse<ResponseData : Codable> : Codable
 	{
@@ -77,6 +81,7 @@ Raise3DAPI
 		var error				:	ResponseError?
 	}
 	
+	public
 	struct
 	ResponseError : Codable
 	{
@@ -84,17 +89,19 @@ Raise3DAPI
 		var msg					:	String
 	}
 	
+	public
 	struct
 	LoginData : Codable
 	{
 		var token				:	String
 	}
 		
+	public
 	func
 	getSystemInformation()
 		async
 		throws
-		-> PrinterResponse<SystemInformation>
+		-> SystemInformation
 	{
 		let session = URLSession.shared
 		
@@ -112,27 +119,29 @@ Raise3DAPI
 		let (data, _) = try await session.data(for: req)
 		let resp = try JSONDecoder().decode(PrinterResponse<SystemInformation>.self, from: data)
 		guard
-			resp.status == 1
+			resp.status == 1,
+			let data = resp.data
 		else
 		{
 			throw Errors.requestFailed
 		}
 		
-		return resp
+		return data
 	}
 	
+	public
 	struct
 	SystemInformation : Codable
 	{
-		var	apiVersion			:	String
-		var	dateTime			:	String
-		var	firmwareVersion		:	String
-		var	model				:	String
-		var	name				:	String
-		var	serialNumber		:	String
-		var	storageAvailable	:	Int
-		var	update				:	String
-		var	version				:	String
+		public var	apiVersion			:	String
+		public var	dateTime			:	String
+		public var	firmwareVersion		:	String
+		public var	model				:	String
+		public var	name				:	String
+		public var	serialNumber		:	String
+		public var	storageAvailable	:	Int
+		public var	update				:	String
+		public var	version				:	String
 		
 		enum
 		CodingKeys : String, CodingKey
@@ -149,11 +158,12 @@ Raise3DAPI
 		}
 	}
 		
+	public
 	func
 	getRunningStatus()
 		async
 		throws
-		-> PrinterResponse<RunningStatus>
+		-> RunningStatus
 	{
 		let session = URLSession.shared
 		
@@ -171,18 +181,21 @@ Raise3DAPI
 		let (data, _) = try await session.data(for: req)
 		let resp = try JSONDecoder().decode(PrinterResponse<RunningStatus>.self, from: data)
 		guard
-			resp.status == 1
+			resp.status == 1,
+			let data = resp.data
 		else
 		{
 			throw Errors.requestFailed
 		}
 		
-		return resp
+		return data
 	}
 	
+	public
 	struct
 	RunningStatus : Codable
 	{
+		public
 		enum
 		Status : String, Codable
 		{
@@ -194,7 +207,7 @@ Raise3DAPI
 			case error
 		}
 		
-		var	status				:	Status
+		public var	status				:	Status
 		
 		enum
 		CodingKeys : String, CodingKey
@@ -203,11 +216,12 @@ Raise3DAPI
 		}
 	}
 		
+	public
 	func
 	getBasicInformation()
 		async
 		throws
-		-> PrinterResponse<BasicInformation>
+		-> BasicInformation
 	{
 		let session = URLSession.shared
 		
@@ -225,24 +239,26 @@ Raise3DAPI
 		let (data, _) = try await session.data(for: req)
 		let resp = try JSONDecoder().decode(PrinterResponse<BasicInformation>.self, from: data)
 		guard
-			resp.status == 1
+			resp.status == 1,
+			let data = resp.data
 		else
 		{
 			throw Errors.requestFailed
 		}
 		
-		return resp
+		return data
 	}
 	
+	public
 	struct
 	BasicInformation : Codable
 	{
-		var	fanSpeed			:	Float
-		var	targetFanSpeed		:	Float
-		var	feedRate			:	Float
-		var	targetFeedRate		:	Float
-		var	heatbedTemp			:	Float
-		var	targetHeatbedTemp	:	Float
+		public var	fanSpeed			:	Float
+		public var	targetFanSpeed		:	Float
+		public var	feedRate			:	Float
+		public var	targetFeedRate		:	Float
+		public var	heatbedTemp			:	Float
+		public var	targetHeatbedTemp	:	Float
 		
 		enum
 		CodingKeys : String, CodingKey
@@ -256,11 +272,12 @@ Raise3DAPI
 		}
 	}
 		
+	public
 	func
 	getJobInformation()
 		async
 		throws
-		-> PrinterResponse<JobInformation>
+		-> JobInformation
 	{
 		let session = URLSession.shared
 		
@@ -278,24 +295,27 @@ Raise3DAPI
 		let (data, _) = try await session.data(for: req)
 		let resp = try JSONDecoder().decode(PrinterResponse<JobInformation>.self, from: data)
 		guard
-			resp.status == 1
+			resp.status == 1,
+			let data = resp.data
 		else
 		{
 			throw Errors.requestFailed
 		}
 		
-		return resp
+		return data
 	}
 	
+	public
 	struct
 	JobInformation : Codable
 	{
-		var	fileName			:	String
-		var	progress			:	Float		//	TODO: divide returned value by 100.
-		var	status				:	Status
-		var	elapsedTime			:	Int
-		var	totalTime			:	Int
+		public var	fileName			:	String
+		public var	progress			:	Float		//	TODO: divide returned value by 100.
+		public var	status				:	Status
+		public var	elapsedTime			:	Int
+		public var	totalTime			:	Int
 		
+		public
 		enum
 		Status : String, Codable
 		{

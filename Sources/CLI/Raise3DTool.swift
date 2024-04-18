@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
 
+import Raise3DAPI
 
 
 
@@ -102,15 +103,7 @@ Raise3DTool
 			
 			let api = Raise3DAPI(host: self.options.addr, password: password)
 			try await api.login()
-			let jobResp = try await api.getJobInformation()
-			
-			guard
-				let job = jobResp.data
-			else
-			{
-				print("Unable to get job status")
-				return
-			}
+			let job = try await api.getJobInformation()
 			
 			print("File:           \(job.fileName)")
 			print("Status:         \(job.status)")
@@ -154,17 +147,8 @@ Status : PrinterCommand
 		
 		let api = Raise3DAPI(host: self.options.addr, password: password)
 		try await api.login()
-		let statusResp = try await api.getRunningStatus()
-		let basicResp = try await api.getBasicInformation()
-		
-		guard
-			let status = statusResp.data,
-			let basic = basicResp.data
-		else
-		{
-			print("Unable to get printer status")
-			return
-		}
+		let status = try await api.getRunningStatus()
+		let basic = try await api.getBasicInformation()
 		
 		print("Status:              \(status.status)")
 		print("Heatbed temp:        \(basic.heatbedTemp)")
@@ -198,14 +182,7 @@ Info : AsyncParsableCommand
 		
 		let api = Raise3DAPI(host: self.options.addr, password: password)
 		try await api.login()
-		let resp = try await api.getSystemInformation()
-		guard
-			let info = resp.data
-		else
-		{
-			print("Unable to get printer information")
-			return
-		}
+		let info = try await api.getSystemInformation()
 		
 		print("Name:              \(info.name)")
 		print("Model:             \(info.model)")
@@ -253,10 +230,7 @@ Monitor : AsyncParsableCommand
 		//	Get the current state…
 		
 		let initJob = try await api.getJobInformation()
-		if let progress = initJob.data?.progress
-		{
-			self.nextProgressMilestone = nextMilestone(for: progress / 100.0)
-		}
+		self.nextProgressMilestone = nextMilestone(for: initJob.progress / 100.0)
 		
 		//	Poll the printer for updates…
 		
@@ -265,25 +239,19 @@ Monitor : AsyncParsableCommand
 			do
 			{
 				let job = try await api.getJobInformation()
-				guard
-					let jobStatus = job.data
-				else
-				{
-					continue
-				}
 				
-				let progress = jobStatus.progress / 100.0
+				let progress = job.progress / 100.0
 				let progS = progress.formatted(.percent.precision(.fractionLength(1)))
 				
 				if progress > 0.0
 					&& progress >= self.nextProgressMilestone
-					&& jobStatus.status == .running
+					&& job.status == .running
 				{
 					print("Progress: \(progS) (next milestone: \(self.nextProgressMilestone.formatted(.percent.precision(.fractionLength(1)))))")
 					
 					if let notifyKey = self.notify
 					{
-						let remaining = Duration.seconds(jobStatus.totalTime - jobStatus.elapsedTime)
+						let remaining = Duration.seconds(job.totalTime - job.elapsedTime)
 						let remainS = remaining.formatted(.time(pattern: .hourMinuteSecond(padHourToLength: 2)))
 						try await sendNotification(key: notifyKey, title: "Printer Progress", message: "\(progS), \(remainS) remaining")
 					}
@@ -291,18 +259,18 @@ Monitor : AsyncParsableCommand
 				
 				self.nextProgressMilestone = nextMilestone(for: progress)
 				
-				if lastStatus != jobStatus.status,
-					[.paused, .stopped, .completed].contains(jobStatus.status)
+				if lastStatus != job.status,
+					[.paused, .stopped, .completed].contains(job.status)
 				{
 					print("Printer has paused or stopped")
 					
 					if let notifyKey = self.notify
 					{
-						try await sendNotification(key: notifyKey, title: "Printer has Stopped", message: "Printer is \(jobStatus.status)")
+						try await sendNotification(key: notifyKey, title: "Printer has Stopped", message: "Printer is \(job.status)")
 					}
 				}
 				
-				self.lastStatus = jobStatus.status
+				self.lastStatus = job.status
 				
 				try await Task.sleep(for: .seconds(self.interval))
 			}
@@ -347,7 +315,7 @@ Monitor : AsyncParsableCommand
 		req.setValue("application/x-www-form-urlencoded; charset=utf-8", forHTTPHeaderField: "content-type")
 		req.httpBody = params.data(using: .utf8)
 		
-		let (data, resp) = try await URLSession.shared.data(for: req)
+		let (_, resp) = try await URLSession.shared.data(for: req)
 		let status = (resp as! HTTPURLResponse).statusCode
 		print("Notification send status: \(status)")
 	}
