@@ -9,12 +9,21 @@ A set of utilities for monitoring Raise3D 3D printers, and a Swift wrapper for t
 
 	```bash
 	% swift run raise3d --addr <printer IP address:port> --password <printer password> info
+	Building for debugging...
+	[1/1] Write swift-version--58304C5D6DBC2206.txt
+	Build complete! (0.13s)
+	Name:              Raise3D
+	Model:             Raise3D Pro2
+	Version:           1.7.7.1026
+	Storage available: 2.4 MB
+	Firmware version:  1.7.0.1008
+	API version:       0.1.0.926
 	```
 
 
 ## Notifications
 
-For now, notifications require the use of the [Alertz](https://alertzy.app) and service. Install the app,
+For now, notifications require the use of the [Alertz](https://alertzy.app) app and service. Install the app,
 register, and copy the account key from the Account tab. Then invoke the `raise3d` tool like this:
 
 ```bash
