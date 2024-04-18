@@ -2,6 +2,9 @@
 
 A set of utilities for monitoring Raise3D 3D printers, and a Swift wrapper for the printer’s REST API.
 
+> **Note:** I have only tested this on macOS 14.4. It should work on Linux, maybe even Windows,
+but I haven’t tried it. You’ll probably have to adjust the `platforms` value in `Package.swift`.
+
 Note that I’m working on automated builds to make using this tool simpler. But in the meantime, you
 can build and run it yourself:
 
