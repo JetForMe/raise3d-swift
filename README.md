@@ -2,6 +2,9 @@
 
 A set of utilities for monitoring Raise3D 3D printers, and a Swift wrapper for the printer’s REST API.
 
+Note that I’m working on automated builds to make using this tool simpler. But in the meantime, you
+can build and run it yourself:
+
 ## Basic Usage
 
 1. Download or clone the repo.
@@ -35,6 +38,8 @@ Monitoring printer at address: <printer IP address:port>
 Progress: 77.5% (next milestone: 80.0%)
 ```
 Every 10%, you’ll get a notification, and you should get a notification if the printer is paused or stopped.
+
+Control-C to stop.
  
 ## Motivation
 
