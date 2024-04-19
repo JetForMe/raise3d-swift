@@ -23,7 +23,7 @@ jobs:
         with:
           files: ${{ github.ref_name }}.tar.gz
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: mislav/bump-homebrew-formula-action@v2
+      - uses: mislav/bump-homebrew-formula-action@v3
         with:
           formula-name: raise3d-tool
           homebrew-tap: jetforme/homebrew-tap
