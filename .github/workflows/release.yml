@@ -17,7 +17,7 @@ jobs:
       - name: Build executable for release
         run: swift build -c release --arch arm64 --arch x86_64 --product raise3d
       - name: Compress archive
-        run: tar -czf ${{ github.ref_name }}.tar.gz -C .build/apple/Products/Release chatty
+        run: tar -czf ${{ github.ref_name }}.tar.gz -C .build/apple/Products/Release raise3d
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
@@ -30,4 +30,4 @@ jobs:
           base-branch: main
           download-url: https://github.com/JetForMe/raise3d-swift/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
         env:
-          COMMITTER_TOKEN: ${{ secrets.CHATTY_COMMITTER_TOKEN }}
+          COMMITTER_TOKEN: ${{ secrets.raise3DCommitter }}
