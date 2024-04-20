@@ -23,7 +23,7 @@ Brew will install a pre-built binary on macOS:
 % brew install raise3d-tool 
 ```
 
-#### Installation from Source
+### Installation from Source
 
 The sections below assume you’ve installed from Brew. If you’re building and running directly from source, change to the source directory, and replace instances of `raise3d` below with `swift run raise3d`:
 
