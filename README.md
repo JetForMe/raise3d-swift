@@ -2,11 +2,27 @@
 
 A set of utilities for monitoring Raise3D 3D printers, and a Swift wrapper for the printer’s REST API.
 
-> **Note:** I have only tested this on macOS 14.4. It should work on Linux, maybe even Windows,
+The only useful thing this does right now is notify you of progress and if the printer is paused or
+stopped.
+
+> **Note:** This tool is in its very early stages. Many things may not work well, from installing it
+to running it. I have only tested this on macOS 14.4. It might work on Linux, maybe even Windows,
 but I haven’t tried it. You’ll probably have to adjust the `platforms` value in `Package.swift`.
 
-Note that I’m working on automated builds to make using this tool simpler. But in the meantime, you
-can build and run it yourself:
+> If you run into problems, please file issues in the Github repo. I’ll do my best to help, but this
+is a very low priority project for me.
+
+## Installation
+
+Install via brew, or download the sources and run directly. You’ll need a Swift 5.10+ compiler
+installed to do that.
+
+Brew will install a pre-built binary on macOS:
+
+```bash
+% brew tap jetforme/tap
+% brew install raise3d-tool 
+```
 
 ## Basic Usage
 
