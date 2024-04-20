@@ -5,8 +5,7 @@ A set of utilities for monitoring Raise3D 3D printers, and a Swift wrapper for t
 The only useful thing this does right now is notify you of progress and if the printer is paused or stopped.
 
 > **Note:** This tool is in its very early stages. Many things may not work well, from installing it to running it. I have only tested this on macOS 14.4. It might work on Linux, maybe even Windows, but I haven’t tried it. You’ll probably have to adjust the `platforms` value in `Package.swift`.
-
-> If you run into problems, please file issues in the Github repo. I’ll do my best to help, but this is a very low priority project for me.
+If you run into problems, please file issues in the Github repo. I’ll do my best to help, but this is a very low priority project for me.
 
 > **Important Note:** The functionality provided by this tool depends on the printer’s development API being enabled. Section 6.17 “Developer” of the [manual](https://support.raise3d.com/tree.html?cid=17&sid=887) has vague instructions on how to do this. I’ll write something more helpful later.
 
