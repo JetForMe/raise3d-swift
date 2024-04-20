@@ -30,10 +30,7 @@ Brew will install a pre-built binary on macOS:
 The sections below assume you’ve installed from Brew. If you’re building and running directly from source, change to the source directory, and replace instances of `raise3d` below with `swift run raise3d`:
 
 ```bash
-% swift run raise3d --addr <printer IP address:port> --password <printer password> info
-Building for debugging...
-[1/1] Write swift-version--58304C5D6DBC2206.txt
-Build complete! (0.13s)
+% raise3d --addr <printer IP address:port> --password <printer password> info
 Name:              Raise3D
 Model:             Raise3D Pro2
 Version:           1.7.7.1026
@@ -76,6 +73,7 @@ Control-C to stop.
 I have a lot of printing to do over the coming months, and I want to more easily monitor progress and be
 alerted to issues. Here are some of the things I’m thinking about, in no particular order:
 
+* Fill out reported information in tool
 * Complete the REST API SDK
 * iOS App
 * Better output for the command-line tool so that it’s more useful in scripts
