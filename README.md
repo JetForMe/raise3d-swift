@@ -14,7 +14,9 @@ is a very low priority project for me.
 
 ## Installation
 
-Install via brew, or download the sources and run directly. You’ll need a Swift 5.10+ compiler
+> **Note**: For now, this only works on macOS.
+
+Install via [brew](https://brew.sh), or download the sources and run directly. You’ll need a Swift 5.10+ compiler
 installed to do that.
 
 Brew will install a pre-built binary on macOS:
